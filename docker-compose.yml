@@ -5,3 +5,15 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+  database:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+      MYSQL_DATABASE: flystore
+    volumes:
+      - db-api:/var/lib/mysql
+
+volumes:
+  db-api:
