@@ -2,8 +2,8 @@ import uuid
 import logging
 
 from sqlalchemy.orm import Session
-from . import schemas
-from .User import User
+import schemas
+from models.User import User
 
 
 def get_user(db: Session, user_id: uuid):

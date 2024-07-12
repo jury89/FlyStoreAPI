@@ -5,10 +5,11 @@ from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from sql_app import crud, schemas
-from sql_app.User import User
-from sql_app.schemas import UserCreate
-from sql_app.database import SessionLocal, engine
+import crud
+import schemas
+from models.User import User
+from schemas import UserCreate
+from database import SessionLocal, engine
 
 User.metadata.create_all(bind=engine)
 
