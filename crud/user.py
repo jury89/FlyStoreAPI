@@ -2,8 +2,8 @@ import uuid
 import logging
 
 from sqlalchemy.orm import Session
-import schemas
-from models.User import User
+from schemas.user import UserCreate
+from models.user import User
 
 
 def get_user(db: Session, user_id: uuid):
@@ -18,7 +18,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, user: UserCreate):
     fake_hashed_password = user.password + "somehashedpassword"
     db_user = User(id=uuid.uuid4(), email=user.email, password=fake_hashed_password)
     logging.info('User Uuid %s' % db_user.id)
