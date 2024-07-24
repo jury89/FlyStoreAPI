@@ -12,7 +12,11 @@ router = APIRouter()
 
 
 @router.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+async def login(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(get_db)
+):
+    print('cacca')
     user_db = crud.user.get_user_by_email(db, form_data.username)
     if not user_db:
         raise HTTPException(status_code=400, detail="Incorrect username or password")

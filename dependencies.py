@@ -15,13 +15,3 @@ def get_db():
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def fake_decode_token(token):
-    return User(
-        email="john@example.com", is_active=True
-    )
-
-
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    return fake_decode_token(token);
