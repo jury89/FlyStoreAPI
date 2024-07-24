@@ -1,28 +1,27 @@
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from database.database import SessionLocal
+
+from dependencies import oauth2_scheme, get_db, get_current_user
 from schemas import user
 import crud.user
+from schemas.user import User
 
 router = APIRouter()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 @router.post("/users/", response_model=user.User)
-def create_user(user: user.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.user.get_user_by_email(db, email=user.email)
+def create_user(
+        token: Annotated[str, Depends(oauth2_scheme)],
+        user_data: user.UserCreate,
+        db: Session = Depends(get_db)
+):
+    db_user = crud.user.get_user_by_email(db, email=user_data.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.user.create_user(db=db, user=user)
+    return crud.user.create_user(db=db, user=user_data)
 
 
 @router.get("/users/{user_id}", response_model=user.User)
@@ -36,3 +35,33 @@ def get_user(user_id: uuid.UUID, db: Session = Depends(get_db)):
 @router.get("/users/", response_model=list[user.User])
 def get_users(db: Session = Depends(get_db)):
     return crud.user.get_users(db)
+
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    decoded_user = fake_decode_token(token)
+    if not decoded_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return decoded_user
+
+
+async def get_current_active_user(
+        current_user: Annotated[User, Depends(get_current_user)],
+):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+@router.get("/users/me")
+async def read_users_me(current_user: Annotated[user.User, Depends(get_current_active_user)]):
+    return current_user
+
+
+def fake_decode_token(token, db: Session = Depends(get_db)):
+    # This doesn't provide any security at all
+    # Check the next version
+    return crud.user.get_user_by_email(db, token)
