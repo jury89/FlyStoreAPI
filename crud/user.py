@@ -1,13 +1,11 @@
 import uuid
-
-from typing import List, Type
 from sqlalchemy.orm import Session
 from core.security import verify_password, get_password_hash
 from schemas.user import UserCreate
 from models.user import User
 
 
-def get_user(db: Session, user_id: uuid) -> User | None:
+def get_user(db: Session, user_id: uuid.UUID) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
 
 
@@ -15,7 +13,7 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[Type[User]]:
+def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
 
